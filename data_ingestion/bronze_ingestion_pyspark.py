@@ -39,10 +39,23 @@ def ingest_ev():
 
         response = requests.get(EV_API_URL, params=params)
 
+        # Check status
+        if response.status_code != 200:
+            print(" API ERROR:", response.status_code)
+            print(response.text)
+            break
+
         data = response.json()
 
-        if not data:
+        #  FIX: ensure it's list of dict
+        if not isinstance(data, list):
+            print(" Invalid API response:", data)
             break
+
+        if len(data) == 0:
+            break
+
+        print(f" Fetched {len(data)} rows")
 
         df = spark.createDataFrame(data)
 
@@ -56,7 +69,6 @@ def ingest_ev():
         offset += limit
 
         time.sleep(1)
-
 
 def ingest_youtube():
 
